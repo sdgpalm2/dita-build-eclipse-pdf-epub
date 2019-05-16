@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Example: DITA Ant Build Script by: Scott Galaba -->
+<project name="Test-documentation" default="all" basedir=".">
+	<!-- set the path location to the DITA-OT -->
+	<property name="dita.dir" location="c:/DITA-OT1.7.5"/>
+	<!-- set the path location to the ditamap file -->
+	<property name="ditamap.dir" location="c:/TestDoc/Source DITA/"/>
+	<!-- set the path location to the ditaval file -->
+	<property name="ditaval.dir" location="c:/TestDoc/Source DITA/ditaval/"/>
+	<!-- set the path location to the css and footer files -->
+	<property name="ditacss.dir" location="c:/TestDoc/Source DITA/Styles/"/>
+	<!-- set the path location to the icons used with notes -->
+	<property name="ditaicons.dir" location="c:/TestDoc/Source DITA/Images/Icons/"/>
+	<!-- set the path location for the generated eclipse output -->
+	<property name="ditaoutput.dir" location="c:/DITAOT/out/eclipse/"/>
+	<!-- set the path location for the generated pdf output -->
+	<property name="ditaoutputpdf.dir" location="c:/DITAOT/out/pdfs/"/>
+	<!-- set the path to the Eclipse Inforcenter Plugin Location -->
+	<property name="ditainfocenter.dir" location="c:/InfocenterTestDoc/eclipse/plugins/"/>
+	
+	<!-- DITA Customization to use -->
+	<property name="ditacustomization" value="c:/DITA-OT1.7.5/plugins/org.dita.pdf2/Customization"/>
+	
+	<!-- DITA Map file to use -->
+	<property name="ditamapfile" value="BigFiDongle.ditamap"/>
+	<!-- DITA Val file to use -->
+	<property name="ditavalfile" value="BigFiDongle.ditaval"/>
+	<!-- DITA Val file to use for PDF -->
+	<property name="ditavalfilepdf" value="BigFiDonglepdf.ditaval"/>
+	<!-- DITA footer file to use -->
+	<property name="ditafooterfile" value="custom-ftr.html"/>
+	<!-- DITA css file to use -->
+	<property name="ditacssfile" value="TestDoc_commonltr.css"/>
+	<!-- Specfic Eclipse Infocenter Plugin Directory Name to use for the above stated ditamap file -->
+	<property name="plugindirname" value="BigFi"/>
+	<!-- pdf file name -->
+	<property name="ditapdffilename" value="BigFiDongle.pdf"/>
+	<!-- epub file name -->
+	<property name="ditaepubfilename" value="BigFiDongle"/>
+	<!-- DITA Val file to use for epub -->
+	<property name="ditavalfileepub" value="BigFiDongleepub.ditaval"/>
+	<!-- epub css file to use -->
+	<property name="ditacssfileepub" value="TestDocEpub_commonltr.css"/>
+	<!-- set the path location for the generated epub output -->
+	<property name="ditaoutputepub.dir" location="c:/DITAOT/out/epub/"/>
+	<!-- set the path and file for epub cover graphic -->
+	<property name="epubcovergrahpicfile" location="c:/TestDoc/Source DITA/Images/Dongles/BigFi_cover_front_760.jpg"/>
+	
+	<!-- Clean out the eclipse and epub build directory before starting a new build -->
+	<delete dir="${ditaoutput.dir}\${plugindirname}"/>
+	<delete dir="${ditaoutputepub.dir}\${plugindirname}"/>
+	<!-- Clear out the Infocenter directory before starting a new build -->
+	<delete dir="${ditainfocenter.dir}\${plugindirname}"/>
+	
+	<!-- set build script to build both an eclipsehelp and pdf output -->
+	<target name="all" description="build eclipse, pdf, and epub" depends="eclipse,pdf,epub"/>
+	
+	<!-- eclipse build script -->
+	<target name="eclipse" description="build Eclipse">
+		<ant antfile="${dita.dir}\build.xml">
+			<!-- set the build type to eclipsehelp -->
+			<property name="transtype" value="eclipsehelp"/>
+			<!-- set the ditamap file to use -->
+			<property name="args.input" value="${ditamap.dir}\${ditamapfile}"/>
+			<!-- set the conditional text settings file to use -->
+			<property name="dita.input.valfile" value="${ditaval.dir}\${ditavalfile}"/>
+			<!-- set the footer file to use -->
+			<property name="args.ftr" value="${ditacss.dir}\${ditafooterfile}"/>
+			<!-- set the css file and path statements -->
+			<property name="args.css" value="${ditacssfile}"/>
+			<property name="args.cssroot" value="${ditacss.dir}"/>
+			<!-- set create index file to yes -->
+			<property name="args.indexshow" value="YES"/>
+			<!-- set the symbolic name (aka plugin id) of the plugin to be produced, overrides the @id value in the ditamap -->
+			<!-- set output directory location -->
+			<property name="output.dir" value="${ditaoutput.dir}\${plugindirname}"/>
+			<!-- clear out temp location -->
+			<property name="clean.temp" value="yes"/>
+		</ant>
+		<!-- force copy of css file due to bug in dita-OT -->
+		<copy file="${ditacss.dir}\TestDoc_commonltr.css" todir="${ditaoutput.dir}\${plugindirname}" overwrite="true"/>
+		<!-- force copy of background icon note images -->
+		<copy file="${ditaicons.dir}\caution_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\danger_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\important_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\note_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\tip_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\tw_icon.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<copy file="${ditaicons.dir}\warning_20.jpg" todir="${ditaoutput.dir}\${plugindirname}\Images\Icons" overwrite="true"/>
+		<!-- Copy eclipsehelp output files (the "plugin") to the Eclipse Inforcenter plugins folder -->
+		<copy todir="${ditainfocenter.dir}\${plugindirname}">
+		<fileset dir="${ditaoutput.dir}\${plugindirname}"/>
+  		</copy> 
+	</target>
+	
+	<!-- pdf build scripot -->
+	<target name="pdf" description="build PDF">
+        <ant antfile="${dita.dir}\build.xml">
+        	<!-- set the build type to pdf2 -->
+        	<property name="transtype" value="pdf2"/>
+        	<!-- the ditamap file to use -->
+        	<property name="args.input" value="${ditamap.dir}\${ditamapfile}"/>
+        	<!-- the conditional text setting file to use -->
+        	<property name="dita.input.valfile" value="${ditaval.dir}\${ditavalfilepdf}"/>
+        	<!-- Customization to use -->
+        	<property name="customization.dir" value="${ditacustomization}"/>
+        	<!-- display task lables in topics -->
+        	<property name="args.gen.task.lbl" value="no"/>
+        	<!-- set related links to nofamily -->
+        	<property name="args.rellinks" value="nofamily"/>
+        	<!-- output directory location -->
+        	<property name="output.dir" value="${ditaoutputpdf.dir}"/>
+    	</ant>
+    	<!-- Copy pdf output file to the Eclipse Inforcenter plugins pdf folder -->
+    	<copy file="${ditaoutputpdf.dir}\${ditapdffilename}" todir="${ditainfocenter.dir}\${plugindirname}\pdfs" overwrite="true"/>
+	</target>
+	
+	<!-- epub build script -->
+	<target name="epub" description="build epub">
+		<ant antfile="${dita.dir}\build.xml">
+			<!-- set the build type to eclipsehelp -->
+			<property name="transtype" value="epub"/>
+			<!-- set the ditamap file to use -->
+			<property name="args.input" value="${ditamap.dir}\${ditamapfile}"/>
+			<!-- set the conditional text settings file to use -->
+			<property name="dita.input.valfile" value="${ditaval.dir}\${ditavalfileepub}"/>
+			<!-- set the footer file to use -->
+			<property name="args.ftr" value="${ditacss.dir}\${ditafooterfile}"/>
+			<!-- set the css file and path statements -->
+			<property name="args.css" value="${ditacssfileepub}"/>
+			<property name="args.cssroot" value="${ditacss.dir}"/>
+			<!-- set create index file to yes -->
+			<property name="args.indexshow" value="YES"/>
+			<!-- set output directory location -->
+			<property name="output.dir" value="${ditaoutputepub.dir}\${plugindirname}"/>
+			<!-- set cover artwork -->
+			<property name="cover.graphic.file" value="${epubcovergrahpicfile}"/>
+			<!-- set TestDoc url -->
+			<property name="epub.pubid.uri.stub" value="http://www.TestDoc.com/"/>
+			<!-- clear out temp location -->
+			<property name="clean.temp" value="yes"/>
+		</ant>
+		<!-- Add apple ibooks option file to epub -->
+		<move file="${ditaoutputepub.dir}\${plugindirname}\${ditaepubfilename}.epub" tofile="${ditaoutputepub.dir}\${plugindirname}\${ditaepubfilename}.zip"/>
+		<unzip src="${ditaoutputepub.dir}\${plugindirname}\${ditaepubfilename}.zip" dest="${ditaoutputepub.dir}\${plugindirname}\${plugindirname}\"/>
+		<copy file="${ditacss.dir}\com.apple.ibooks.display-options.xml" todir="${ditaoutputepub.dir}\${plugindirname}\${plugindirname}\META-INF\" overwrite="true"/>
+		<zip destfile="${ditaoutputepub.dir}\${plugindirname}\${plugindirname}\${ditaepubfilename}.epub" basedir="${ditaoutputepub.dir}\${plugindirname}\${plugindirname}\" excludes="dont*.*"/>
+		<!-- Copy epub output file to the Eclipse Inforcenter plugins epub folder -->
+		<copy file="${ditaoutputepub.dir}\${plugindirname}\${plugindirname}\${ditaepubfilename}.epub" todir="${ditainfocenter.dir}\${plugindirname}\epub" overwrite="true"/>
+	</target>
+
+</project>
+		
